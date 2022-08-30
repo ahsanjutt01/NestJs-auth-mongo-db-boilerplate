@@ -10,7 +10,7 @@ import { CreatePostDTO } from '../../_dtos/post.dto';
 export class PostService {
   constructor(@InjectModel('Post') private PostModel: Model<Post>) {}
 
-  async createHashedPassword(CreatePostDTO: CreatePostDTO) {
+  async createPost(CreatePostDTO: CreatePostDTO) {
     const createdPost = new this.PostModel(CreatePostDTO);
     return createdPost.save();
   }

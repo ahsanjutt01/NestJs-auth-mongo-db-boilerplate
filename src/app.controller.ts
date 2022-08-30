@@ -21,11 +21,13 @@ import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { editFileName, imageFileFilter } from './_util/multer.config';
 import { diskStorage } from 'multer';
 import { JwtAuthGuard } from './guards/jwt.guard';
+import { PostService } from './services/post/post.service';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
+    private readonly postService: PostService,
     private readonly UserService: UserService,
   ) {}
 
@@ -41,12 +43,11 @@ export class AppController {
 
   @Post('login')
   async login(@Body() CreateUserDTO: CreateUserDTO) {
-    console.log('CreatePostDTO ', CreateUserDTO);
     return await this.UserService.login(CreateUserDTO);
   }
 
   @Post('post')
-  @ApiBearerAuth()
+  // @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FilesInterceptor('files', 10, {
@@ -61,6 +62,8 @@ export class AppController {
     schema: {
       type: 'object',
       properties: {
+        title: { type: 'string' },
+        tags: { type: 'string' },
         files: {
           type: 'string',
           format: 'binary',
@@ -68,17 +71,16 @@ export class AppController {
       },
     },
   })
-  @UseGuards(JwtAuthGuard)
-  createPost(
-    // @Body() post: CreatePostDTO,
-    @UploadedFiles() files,
-  ) {
-    // console.log('file =>> ', files);
+  // @UseGuards(JwtAuthGuard)
+  createPost(@Body() post: CreatePostDTO, @UploadedFiles() files) {
+    console.log('file =>> ', post);
     const response = [];
-    files.forEach((file) => {
+    files.forEach((file: any) => {
       response.push(file.path);
     });
-    return response;
+    post.imageUrl = response;
+    post.isMockupsAdded = false;
+    return this.postService.createPost(post);
   }
 
   @Get('images/:imgpath')

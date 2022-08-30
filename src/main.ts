@@ -9,14 +9,14 @@ import { join } from 'path';
 
 async function bootstrap() {
   const port = process.env.PORT || 5000;
-  const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  const app = await NestFactory.create(AppModule, { cors: true });
+  // app.enableCors();
   app.use(`./images`, express.static(join(__dirname, '..', 'images')));
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('Etsy Server')
+    .setDescription('The Etsy API Server to upload multiple mockups to Etsy')
     .setVersion('1.0')
-    .addTag('cats')
+    .addTag('Etsy')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
