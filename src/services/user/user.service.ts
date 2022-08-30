@@ -7,17 +7,25 @@ import * as becrypt from 'bcrypt';
 
 import { User } from 'src/interfaces/user.interface';
 import { CreateUserDTO } from '../../_dtos/user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel('User') private UserModel: Model<User>) {}
+  constructor(
+    @InjectModel('User') private UserModel: Model<User>,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async create(CreateUserDTO: CreateUserDTO): Promise<any> {
     // hashing password and save user
     const password = CreateUserDTO.password;
     CreateUserDTO.password = await this.createHashedPassword(password);
     const createdUser = new this.UserModel(CreateUserDTO);
-    return createdUser.save();
+    const data = await createdUser.save();
+    return {
+      email: data.email,
+      message: 'Signup Sucessful',
+    };
   }
 
   async createHashedPassword(password: string) {
@@ -29,20 +37,23 @@ export class UserService {
     }).exec();
 
     if (!user) {
-      return null;
+      return { message: 'Email not found please login' };
     } else {
       const isPasswordCorrect = await becrypt.compare(
         CreateUserDTO.password,
         user.password,
       );
       if (isPasswordCorrect) {
+        const payload = { email: user.email };
+        const accessToken = this.jwtService.sign(payload, {
+          secret: process.env.JWT_SECRET,
+        });
         return {
-          accessToken: 'onGoing',
+          accessToken,
           message: 'Login successfully',
         };
       } else {
         return {
-          access_token: null,
           message: 'Email and password are incorect',
         };
       }
