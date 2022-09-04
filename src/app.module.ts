@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -11,7 +12,7 @@ import { PostSchema } from './_models/post.model';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/myapp'),
+    MongooseModule.forRoot('mongodb://localhost:27017/league'),
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
       { name: 'Post', schema: PostSchema },
